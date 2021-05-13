@@ -1,0 +1,12 @@
+[submodule "Marketplace-Statistics"]
+	path = Marketplace-Statistics
+	url = git@github.com:VaSmitka/Marketplace-Statistics.git
+	branch = main
+[submodule "rengars_marketplace"]
+	path = rengars_marketplace
+	url = git@github.com:agilehorse/rengars_marketplace.git
+	branch = main
+[submodule "swa-rengars-notificator"]
+	path = swa-rengars-notificator
+	url = git@github.com:strazovan/swa-rengars-notificator.git
+	branch = master
