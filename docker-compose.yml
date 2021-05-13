@@ -1,0 +1,174 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres
+    container_name: swa_postgres    
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    expose:
+      - ${POSTGRES_PORT}
+    healthcheck:
+      test: ["CMD", "psql", "${POSTGRES_USER}", "-h", "0.0.0.0", "-d", "swa_statistics"]
+      interval: 5s
+    volumes:
+      - ./Marketplace-Statistics/scripts/create-multiple-databases.sh:/docker-entrypoint-initdb.d/create-multiple-databases.sh
+      - /var/lib/postgresql/data    
+    networks:
+      - statistics_user
+      - postgres_db_admin  
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:4.0.8
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_DATABASE: root-db
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGODB_DATA_DIR: /data/db
+      MONDODB_LOG_DIR: /dev/null
+    expose:
+      - ${MONGO_PORT}
+    command: mongod --auth
+    volumes:
+      - "./mongo-init/:/docker-entrypoint-initdb.d/"
+      - /var/lib/mongodb/data
+    networks:
+      - marketplace_user
+      - notification_user
+    restart: unless-stopped
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: swa_pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - 8001:${PGADMIN_PORT}
+    depends_on:
+      - postgres
+    volumes:
+      - /var/lib/pgadmin    
+    networks:
+      - postgres_db_admin
+    restart: unless-stopped
+  
+  marketplace:
+    build:
+      context: ./rengars_marketplace/
+      dockerfile: Dockerfile
+    image: python:3.9.4-alpine
+    container_name: marketplace
+    environment:
+      APP_ENV: ${APP_ENV}
+      APP_DEBUG: ${APP_DEBUG}
+      APP_PORT: ${MARKETPLACE_PORT}
+      MONGODB_DATABASE: ${MARKETPLACE_DATABASE_NAME}
+      MONGODB_USERNAME: ${DB_MARKETPLACE_USERNAME}
+      MONGODB_PASSWORD: ${DB_MARKETPLACE_PASSWORD}
+      MONGODB_HOSTNAME: ${MONGO_HOST}
+    ports:
+      - 5000:${MARKETPLACE_PORT}
+    depends_on:
+      - mongodb    
+    volumes:
+      - appdata:/var/www
+    networks:
+      - marketplace_webserver
+      - marketplace_user
+    restart: unless-stopped
+
+  statistics:
+    build:
+      context: ./Marketplace-Statistics/
+      dockerfile: "Dockerfile.${BUILD_TYPE}"
+    container_name: swa_statistics    
+    environment:
+      SERVER_PORT: ${STATISTICS_PORT}
+      BUILD_TYPE: ${BUILD_TYPE}
+      DB_TYPE: ${DB_TYPE}
+      DB_URL: ${DB_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_MULTIPLE_DATABASES}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+    ports:
+      - "${STATISTICS_PORT}:${STATISTICS_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy 
+    volumes:
+      - ./Marketplace-Statistics/:/usr/src/statistics/
+      - /usr/src/statistics/node_modules    
+    networks:
+      - statistics_user
+    restart: unless-stopped
+
+  notifications:
+    build:
+      context: ./swa-rengars-notificator/
+      dockerfile: "Dockerfile"
+    container_name: swa_notifications    
+    environment:
+      MONGO_DATABASE: ${NOTIFICATION_DATABASE_NAME}
+      MONGO_USERNAME: ${DB_NOTIFICATION_USERNAME}
+      MONGO_PASSWORD: ${DB_NOTIFICATION_PASSWORD}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+    ports:
+      - 18080:${NOTIFICATION_PORT}
+    depends_on:
+      - mongodb
+    volumes:
+      - ./swa-rengars-notificator/:/usr/src/notifications/
+    networks:
+      - notification_user
+    restart: unless-stopped
+
+  webserver:
+    build:
+      context: ./rengars_marketplace/nginx
+      dockerfile: Dockerfile
+    image: digitalocean.com/webserver:latest
+    container_name: webserver
+    environment:
+      APP_ENV: ${APP_ENV}
+      APP_DEBUG: ${APP_DEBUG}
+      APP_NAME: "webserver"
+      SERVICE_NAME: "webserver"
+    ports:
+      - "81:${WEBSERVER_PORT_1}"
+      - "444:${WEBSERVER_PORT_2}"
+    depends_on:
+      - marketplace
+    volumes:
+      - nginxdata:/var/log/nginx
+    networks:
+      - marketplace_webserver
+    restart: unless-stopped
+
+
+networks:  
+  postgres_db_admin:
+    driver: bridge
+  marketplace_user:
+    driver: bridge
+  statistics_user:
+    driver: bridge
+  notification_user:
+    driver: bridge
+  marketplace_webserver:
+    driver: bridge
+
+volumes:
+  mongodbdata:
+    driver: local
+  nginxdata:
+    driver: local
+  appdata:
+    driver: local
