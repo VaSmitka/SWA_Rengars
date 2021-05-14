@@ -7,13 +7,13 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     expose:
       - ${POSTGRES_PORT}
     healthcheck:
-      test: ["CMD", "psql", "${POSTGRES_USER}", "-h", "0.0.0.0", "-d", "swa_statistics"]
+      test: ["CMD", "psql", "${POSTGRES_USER}", "-h", "0.0.0.0", "-d", "${POSTGRES_DB}"]
       interval: 5s
     volumes:
-      - ./Marketplace-Statistics/scripts/create-multiple-databases.sh:/docker-entrypoint-initdb.d/create-multiple-databases.sh
       - /var/lib/postgresql/data    
     networks:
       - statistics_user
@@ -47,7 +47,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
-      - 8001:${PGADMIN_PORT}
+      - ${PGADMIN_PORT}:80
     depends_on:
       - postgres
     volumes:
@@ -60,7 +60,8 @@ services:
     build:
       context: ./rengars_marketplace/
       dockerfile: Dockerfile
-    image: python:3.9.4-alpine
+      args: 
+        MARKETPLACE_PORT: ${MARKETPLACE_PORT}
     container_name: marketplace
     environment:
       APP_ENV: ${APP_ENV}
@@ -70,8 +71,6 @@ services:
       MONGODB_USERNAME: ${DB_MARKETPLACE_USERNAME}
       MONGODB_PASSWORD: ${DB_MARKETPLACE_PASSWORD}
       MONGODB_HOSTNAME: ${MONGO_HOST}
-    ports:
-      - 5000:${MARKETPLACE_PORT}
     depends_on:
       - mongodb    
     volumes:
@@ -85,6 +84,8 @@ services:
     build:
       context: ./Marketplace-Statistics/
       dockerfile: "Dockerfile.${BUILD_TYPE}"
+      args: 
+        STATISTICS_PORT: ${STATISTICS_PORT}
     container_name: swa_statistics    
     environment:
       SERVER_PORT: ${STATISTICS_PORT}
@@ -93,7 +94,7 @@ services:
       DB_URL: ${DB_URL}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_MULTIPLE_DATABASES}
+      POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_DB}
       POSTGRES_PORT: ${POSTGRES_PORT}
     ports:
       - "${STATISTICS_PORT}:${STATISTICS_PORT}"
@@ -113,6 +114,8 @@ services:
       dockerfile: "Dockerfile"
     container_name: swa_notifications    
     environment:
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_HOST: ${MONGO_HOST}
       MONGO_DATABASE: ${NOTIFICATION_DATABASE_NAME}
       MONGO_USERNAME: ${DB_NOTIFICATION_USERNAME}
       MONGO_PASSWORD: ${DB_NOTIFICATION_PASSWORD}
@@ -121,7 +124,7 @@ services:
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
     ports:
-      - 18080:${NOTIFICATION_PORT}
+      - ${NOTIFICATION_PORT}:8080
     depends_on:
       - mongodb
     volumes:
@@ -134,16 +137,18 @@ services:
     build:
       context: ./rengars_marketplace/nginx
       dockerfile: Dockerfile
+      args: 
+        BUILD_TYPE: ${APP_ENV}
     image: digitalocean.com/webserver:latest
     container_name: webserver
     environment:
       APP_ENV: ${APP_ENV}
-      APP_DEBUG: ${APP_DEBUG}
+      APP_DEBUG: ${NGINX_DEBUG}
       APP_NAME: "webserver"
       SERVICE_NAME: "webserver"
     ports:
-      - "81:${WEBSERVER_PORT_1}"
-      - "444:${WEBSERVER_PORT_2}"
+      - "${WEBSERVER_PORT_1}:81"
+      - "${WEBSERVER_PORT_2}:444"
     depends_on:
       - marketplace
     volumes:
