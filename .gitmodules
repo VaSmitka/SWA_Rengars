@@ -10,3 +10,7 @@
 	path = swa-rengars-notificator
 	url = git@github.com:strazovan/swa-rengars-notificator.git
 	branch = master
+[submodule "swa-rengars-user-service"]
+	path = swa-rengars-user-service
+	url = git@github.com:uhel97/swa-rengars-user-service.git
+	branch = main
