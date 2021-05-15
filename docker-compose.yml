@@ -22,13 +22,18 @@ services:
 
   mongodb:
     image: mongo:4.0.8
-    container_name: mongodb
+    container_name: swa_mongodb
     environment:
       MONGO_INITDB_DATABASE: root-db
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
       MONGODB_DATA_DIR: /data/db
       MONDODB_LOG_DIR: /dev/null
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.runCommand('ping').ok", "localhost:${MONGO_PORT}/root-db", "--quiet"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
     expose:
       - ${MONGO_PORT}
     command: mongod --auth
@@ -38,6 +43,21 @@ services:
     networks:
       - marketplace_user
       - notification_user
+    restart: unless-stopped
+  
+  mysql8.0:
+    image: mysql:8.0
+    container_name: swa_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    expose:
+      - ${MYSQL_PORT}
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - /var/lib/mysql   
+    networks:
+      - users_user
+      - mysql_db_admin
     restart: unless-stopped
   
   pgadmin:
@@ -55,6 +75,36 @@ services:
     networks:
       - postgres_db_admin
     restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: swa_phpmyadmin    
+    environment:
+      PMA_ARBITRARY: 1
+    ports:
+      - ${PHPADMIN_PORT}:80
+    depends_on:
+      -  mysql8.0
+    networks:
+      - mysql_db_admin
+    restart: unless-stopped
+
+  users:
+    build:
+      context: ./swa-rengars-user-service/
+      dockerfile: Dockerfile
+      args: 
+        USERS_PORT: ${USERS_PORT}
+    container_name: swa_users
+    ports:
+      - "${USERS_PORT}:${USERS_PORT}"
+    depends_on:
+      -  mysql8.0
+    volumes:
+      - ./swa-rengars-user-service/:/usr/src/users/
+    networks:
+      - users_user
+    restart: unless-stopped    
   
   marketplace:
     build:
@@ -62,7 +112,7 @@ services:
       dockerfile: Dockerfile
       args: 
         MARKETPLACE_PORT: ${MARKETPLACE_PORT}
-    container_name: marketplace
+    container_name: swa_marketplace
     environment:
       APP_ENV: ${APP_ENV}
       APP_DEBUG: ${APP_DEBUG}
@@ -72,7 +122,8 @@ services:
       MONGODB_PASSWORD: ${DB_MARKETPLACE_PASSWORD}
       MONGODB_HOSTNAME: ${MONGO_HOST}
     depends_on:
-      - mongodb    
+      mongodb:
+        condition: service_healthy     
     volumes:
       - appdata:/var/www
     networks:
@@ -126,7 +177,8 @@ services:
     ports:
       - ${NOTIFICATION_PORT}:8080
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy 
     volumes:
       - ./swa-rengars-notificator/:/usr/src/notifications/
     networks:
@@ -140,7 +192,7 @@ services:
       args: 
         BUILD_TYPE: ${APP_ENV}
     image: digitalocean.com/webserver:latest
-    container_name: webserver
+    container_name: swa_webserver
     environment:
       APP_ENV: ${APP_ENV}
       APP_DEBUG: ${NGINX_DEBUG}
@@ -160,6 +212,10 @@ services:
 
 networks:  
   postgres_db_admin:
+    driver: bridge
+  mysql_db_admin:
+    driver: bridge
+  users_user:
     driver: bridge
   marketplace_user:
     driver: bridge
