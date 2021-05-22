@@ -59,6 +59,17 @@ services:
       - users_user
       - mysql_db_admin
     restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: swa_rabbit_mq
+    networks:
+      - network
+    expose:
+      - ${RABBIT_MQ_PORT}
+    ports:
+      - 15672:15672
+    restart: on-failure
   
   pgadmin:
     image: dpage/pgadmin4
@@ -99,7 +110,8 @@ services:
     ports:
       - "${USERS_PORT}:${USERS_PORT}"
     depends_on:
-      -  mysql8.0
+      - mysql8.0
+      - rabbitmq 
     volumes:
       - ./swa-rengars-user-service/:/usr/src/users/
     networks:
@@ -117,11 +129,15 @@ services:
       APP_ENV: ${APP_ENV}
       APP_DEBUG: ${APP_DEBUG}
       APP_PORT: ${MARKETPLACE_PORT}
+      EUREKA_URL: "${EUREKA_HOST}:${EUREKA_PORT}"
+      RABBIT_URL: "${RABBIT_MQ_HOST}:${RABBIT_MQ_PORT}"
+      RABBIT_EXCHANGE: ${RABBIT_MQ_EXCHANGE}
       MONGODB_DATABASE: ${MARKETPLACE_DATABASE_NAME}
       MONGODB_USERNAME: ${DB_MARKETPLACE_USERNAME}
       MONGODB_PASSWORD: ${DB_MARKETPLACE_PASSWORD}
       MONGODB_HOSTNAME: ${MONGO_HOST}
     depends_on:
+      - rabbitmq
       mongodb:
         condition: service_healthy     
     volumes:
@@ -147,9 +163,14 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_DB}
       POSTGRES_PORT: ${POSTGRES_PORT}
+      RABBIT_MQ_HOST: ${RABBIT_MQ_HOST}
+      RABBIT_MQ_PORT: ${RABBIT_MQ_PORT}
+      RABBIT_MQ_EXCHANGE: ${RABBIT_MQ_EXCHANGE}
+      RABBIT_MQ_QUEUE: ${STATISTICS_RABBIT_MQ_QUEUE}
     ports:
       - "${STATISTICS_PORT}:${STATISTICS_PORT}"
     depends_on:
+      - rabbitmq
       postgres:
         condition: service_healthy 
     volumes:
@@ -174,9 +195,14 @@ services:
       MAIL_PORT: ${MAIL_PORT}
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
+      RABBIT_MQ_HOST: ${RABBIT_MQ_HOST}
+      RABBIT_MQ_PORT: ${RABBIT_MQ_PORT}
+      RABBIT_MQ_EXCHANGE: ${RABBIT_MQ_EXCHANGE}
+      RABBIT_MQ_QUEUE: ${NOTIFICATION_RABBIT_MQ_QUEUE}
     ports:
       - ${NOTIFICATION_PORT}:8080
     depends_on:
+      - rabbitmq
       mongodb:
         condition: service_healthy 
     volumes:
