@@ -14,7 +14,7 @@ services:
       test: ["CMD", "psql", "${POSTGRES_USER}", "-h", "0.0.0.0", "-d", "${POSTGRES_DB}"]
       interval: 5s
     volumes:
-      - /var/lib/postgresql/data    
+      - postgresdata:/var/lib/postgresql/data    
     networks:
       - statistics_user
       - postgres_db_admin  
@@ -30,7 +30,7 @@ services:
       MONGODB_DATA_DIR: /data/db
       MONDODB_LOG_DIR: /dev/null
     healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.runCommand('ping').ok", "localhost:${MONGO_PORT}/root-db", "--quiet"]
+      test: ["CMD", "mongo", "--eval", "db.runCommand('ping').ok", "localhost:${MONGO_PORT}/${NOTIFICATION_DATABASE_NAME}", "--quiet"]
       interval: 5s
       timeout: 5s
       retries: 12
@@ -39,22 +39,23 @@ services:
     command: mongod --auth
     volumes:
       - "./mongo-init/:/docker-entrypoint-initdb.d/"
-      - /var/lib/mongodb/data
+      - mongodbdata:/var/lib/mongodb/data
     networks:
       - marketplace_user
       - notification_user
     restart: unless-stopped
   
   mysql:
-    image: mysql:8.0
+    image: mysql:latest
     container_name: swa_mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     expose:
       - ${MYSQL_PORT}
-      command: --init-file ./swa-rengars-user-service/src/main/resources/db_create.sql --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - /var/lib/mysql   
+      - mysqldata:/var/lib/mysql   
     networks:
       - users_user
       - mysql_db_admin
@@ -96,7 +97,7 @@ services:
       - /var/lib/pgadmin    
     networks:
       - postgres_db_admin
-    restart: unless-stopped
+    restart: on-failure
 
   phpmyadmin:
     image: phpmyadmin
@@ -109,21 +110,21 @@ services:
       -  mysql
     networks:
       - mysql_db_admin
-    restart: unless-stopped
+    restart: on-failure
 
   users:
     build:
       context: ./swa-rengars-user-service/
       dockerfile: Dockerfile
-      args: 
-        USERS_PORT: ${USERS_PORT}
     container_name: swa_users
-    image: openjdk:11-jdk-alpine
     environment:
       EUREKA_URL: "${EUREKA_HOST}:${EUREKA_PORT}"
-      RABBIT_URL: "${RABBIT_MQ_HOST}:${RABBIT_MQ_PORT}"
+      RABBIT_MQ_HOST: ${RABBIT_MQ_HOST}
+      RABBIT_MQ_PORT: ${RABBIT_MQ_PORT}
+      RABBIT_MQ_EXCHANGE: ${RABBIT_MQ_EXCHANGE}
       MYSQL_USERNAME: ${MYSQL_USERNAME}
       MYSQL_HOSTNAME: ${MYSQL_HOSTNAME}
+      MYSQL_PORT: ${MYSQL_PORT}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       APP_ENV: ${APP_ENV}
@@ -133,12 +134,12 @@ services:
       - mysql
       - rabbitmq 
     volumes:
-      - ./swa-rengars-user-service/:/usr/src/users/
+      - usersdata:/usr/src/users/
     networks:
       - users_user
       - rengars_eureka
       - rengars_rabbit_mq
-    restart: unless-stopped    
+    restart: on-failure   
   
   marketplace:
     build:
@@ -160,16 +161,15 @@ services:
       MONGODB_HOSTNAME: ${MONGO_HOST}
     depends_on:
       - rabbitmq
-      mongodb:
-        condition: service_healthy     
+      - mongodb
     volumes:
-      - appdata:/var/www
+      - marketplacedata:/var/www
     networks:
       - marketplace_webserver
       - marketplace_user
       - rengars_eureka
       - rengars_rabbit_mq
-    restart: unless-stopped
+    restart: on-failure
 
   statistics:
     build:
@@ -195,20 +195,19 @@ services:
       - "${STATISTICS_PORT}:${STATISTICS_PORT}"
     depends_on:
       - rabbitmq
-      postgres:
-        condition: service_healthy 
+      - postgres
     volumes:
-      - ./Marketplace-Statistics/:/usr/src/statistics/
+      - statisticsdata:/usr/src/statistics/
       - /usr/src/statistics/node_modules    
     networks:
       - statistics_user
       - rengars_rabbit_mq
-    restart: unless-stopped
+    restart: on-failure
 
   notifications:
     build:
       context: ./swa-rengars-notificator/
-      dockerfile: "Dockerfile"
+      dockerfile: Dockerfile
     container_name: swa_notifications    
     environment:
       MONGO_PORT: ${MONGO_PORT}
@@ -228,14 +227,13 @@ services:
       - ${NOTIFICATION_PORT}:8080
     depends_on:
       - rabbitmq
-      mongodb:
-        condition: service_healthy 
+      - mongodb
     volumes:
-      - ./swa-rengars-notificator/:/usr/src/notifications/
+      - notificationsdata:/usr/src/notifications/
     networks:
       - notification_user
       - rengars_rabbit_mq
-    restart: unless-stopped
+    restart: on-failure
 
   webserver:
     build:
@@ -259,7 +257,7 @@ services:
       - nginxdata:/var/log/nginx
     networks:
       - marketplace_webserver
-    restart: unless-stopped
+    restart: on-failure
 
 
 networks:  
@@ -283,9 +281,19 @@ networks:
     driver: bridge
 
 volumes:
+  postgresdata:
+    driver: local
+  mysqldata:
+    driver: local
   mongodbdata:
     driver: local
-  nginxdata:
+  usersdata:
     driver: local
-  appdata:
+  marketplacedata:
+    driver: local
+  statisticsdata:
+    driver: local
+  notificationsdata:
+    driver: local
+  nginxdata:
     driver: local
