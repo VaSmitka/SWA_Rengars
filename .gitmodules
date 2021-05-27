@@ -14,3 +14,6 @@
 	path = swa-rengars-user-service
 	url = git@github.com:uhel97/swa-rengars-user-service.git
 	branch = main
+[submodule "rengars_eureka"]
+	path = rengars_eureka
+	url = git@github.com:agilehorse/rengars_eureka.git
