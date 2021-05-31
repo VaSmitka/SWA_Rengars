@@ -1,0 +1,19 @@
+Servise check:
+  Users - 
+  Marketplace - OK
+  Statistics - OK
+  Notification
+
+DB check:
+  Users + database
+  MarketPlace + database
+  Statistics + database - OK
+  Notification + database
+
+Servise comunication check:
+  Users event to Statistics
+  Users event to Notification
+  Marketplace event to Statistics
+  Marketplace event to Notification
+  Users eureka to Marketplace
+  Marketplace eureka to Users

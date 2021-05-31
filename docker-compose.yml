@@ -118,6 +118,7 @@ services:
       dockerfile: Dockerfile
     container_name: swa_users
     environment:
+      EUREKA_HOST: ${EUREKA_HOST}
       EUREKA_URL: "${EUREKA_HOST}:${EUREKA_PORT}"
       RABBIT_MQ_HOST: ${RABBIT_MQ_HOST}
       RABBIT_MQ_PORT: ${RABBIT_MQ_PORT}
@@ -245,7 +246,7 @@ services:
     container_name: swa_webserver
     environment:
       APP_ENV: ${APP_ENV}
-      APP_DEBUG: ${NGINX_DEBUG}
+      APP_DEBUG: ${APP_ENV}
       APP_NAME: "webserver"
       SERVICE_NAME: "webserver"
     ports:
