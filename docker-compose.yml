@@ -24,9 +24,15 @@ services:
     image: mongo:4.0.8
     container_name: swa_mongodb
     environment:
-      MONGO_INITDB_DATABASE: root-db
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      DB_MARKETPLACE_USERNAME: ${DB_MARKETPLACE_USERNAME}
+      DB_MARKETPLACE_PASSWORD: ${DB_MARKETPLACE_PASSWORD}
+      MARKETPLACE_DATABASE_NAME: ${MARKETPLACE_DATABASE_NAME}
+      DB_NOTIFICATION_USERNAME: ${DB_NOTIFICATION_USERNAME}
+      DB_NOTIFICATION_PASSWORD: ${DB_NOTIFICATION_PASSWORD}
+      NOTIFICATION_DATABASE_NAME: ${NOTIFICATION_DATABASE_NAME}
       MONGODB_DATA_DIR: /data/db
       MONDODB_LOG_DIR: /dev/null
     healthcheck:
@@ -39,7 +45,7 @@ services:
     command: mongod --auth
     volumes:
       - "./mongo-init/:/docker-entrypoint-initdb.d/"
-      - mongodbdata:/var/lib/mongodb/data
+      - mongodbdata:/data/db
     networks:
       - marketplace_user
       - notification_user

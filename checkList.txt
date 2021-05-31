@@ -6,7 +6,7 @@ Servise check:
 
 DB check:
   Users + database
-  MarketPlace + database
+  MarketPlace + database - OK
   Statistics + database - OK
   Notification + database
 

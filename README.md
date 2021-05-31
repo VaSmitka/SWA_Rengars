@@ -9,3 +9,6 @@ password: root
 RABBITMQ
 http://localhost:15672/
 guest guest
+
+MongoDB CLI
+mongo -u swa_root -p swa_password 
