@@ -2,7 +2,7 @@
 set -e
 
 mongo <<EOF
-use admin
+use $MONGO_ROOT_USERNAME
 db = db.getSiblingDB('$MARKETPLACE_DATABASE_NAME');
 db.createUser(
   {

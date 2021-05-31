@@ -5,3 +5,7 @@ PHPADMIN
 server: mysql:8.0
 user: root
 password: root
+
+RABBITMQ
+http://localhost:15672/
+guest guest

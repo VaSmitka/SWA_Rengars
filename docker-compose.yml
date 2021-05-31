@@ -65,22 +65,22 @@ services:
     build:
       context: ./rengars_eureka
       dockerfile: Dockerfile
-    container_name: eureka
-    networks:
-      - rengars_eureka    
+    container_name: eureka    
     ports:
       - "${EUREKA_PORT}:${EUREKA_PORT}"
+    networks:
+      - rengars_eureka    
     restart: on-failure
 
   rabbitmq:
     image: rabbitmq:3-management
     container_name: swa_rabbit_mq
-    networks:
-      - rengars_rabbit_mq
     expose:
       - ${RABBIT_MQ_PORT}
     ports:
-      - 15672:15672
+      - 15672:15672    
+    networks:
+    - rengars_rabbit_mq
     restart: on-failure
   
   pgadmin:
