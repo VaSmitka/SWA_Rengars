@@ -50,18 +50,21 @@ services:
       - marketplace_user
       - notification_user
     restart: unless-stopped
-  
+
   mysql:
-    image: mysql:latest
+    image: mysql:8.0.25
     container_name: swa_mysql
     environment:
+      MYSQL_USERNAME: ${MYSQL_USERNAME}
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
     expose:
       - ${MYSQL_PORT}
     command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - mysqldata:/var/lib/mysql   
+      - ./swa-rengars-user-service/src/main/resources/init.sql:/docker-entrypoint-initdb.d/1.sql
+      - mysqldata:/var/lib/mysql
     networks:
       - users_user
       - mysql_db_admin
@@ -139,14 +142,15 @@ services:
       - "${USERS_PORT}:${USERS_PORT}"
     depends_on:
       - mysql
-      - rabbitmq 
+      - rabbitmq
+      - eureka
     volumes:
       - usersdata:/usr/src/users/
     networks:
       - users_user
       - rengars_eureka
       - rengars_rabbit_mq
-    restart: on-failure   
+    restart: on-failure 
   
   marketplace:
     build:
@@ -169,6 +173,7 @@ services:
     depends_on:
       - rabbitmq
       - mongodb
+      - eureka
     volumes:
       - marketplacedata:/var/www
     networks:

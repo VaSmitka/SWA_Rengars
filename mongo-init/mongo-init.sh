@@ -8,6 +8,9 @@ db.createUser({
     pwd: '$DB_MARKETPLACE_PASSWORD',
     roles: [{ role: 'readWrite', db: '$MARKETPLACE_DATABASE_NAME' }],
 });
+EOF
+
+mongo <<EOF
 use $NOTIFICATION_DATABASE_NAME
 db.createUser({
     user: '$DB_NOTIFICATION_USERNAME',

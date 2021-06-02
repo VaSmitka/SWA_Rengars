@@ -1,11 +1,11 @@
 Servise check:
-  Users - 
+  Users - OK
   Marketplace - OK
   Statistics - OK
-  Notification
+  Notification - OK
 
 DB check:
-  Users + database
+  Users + database - OK
   MarketPlace + database - OK
   Statistics + database - OK
   Notification + database
