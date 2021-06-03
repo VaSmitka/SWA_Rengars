@@ -8,7 +8,7 @@ DB check:
   Users + database - OK
   MarketPlace + database - OK
   Statistics + database - OK
-  Notification + database
+  Notification + database - OK
 
 Servise comunication check:
   Users event to Statistics

@@ -35,6 +35,7 @@ services:
       NOTIFICATION_DATABASE_NAME: ${NOTIFICATION_DATABASE_NAME}
       MONGODB_DATA_DIR: /data/db
       MONDODB_LOG_DIR: /dev/null
+      FROM_MAIL_ADDRESS: ${FROM_MAIL_ADDRESS}
     healthcheck:
       test: ["CMD", "mongo", "--eval", "db.runCommand('ping').ok", "localhost:${MONGO_PORT}/${NOTIFICATION_DATABASE_NAME}", "--quiet"]
       interval: 5s
@@ -89,7 +90,7 @@ services:
     expose:
       - ${RABBIT_MQ_PORT}
     ports:
-      - 15672:15672    
+      - ${RABBIT_MQ_UI_PORT}:15672    
     networks:
     - rengars_rabbit_mq
     restart: on-failure
