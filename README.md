@@ -81,4 +81,4 @@ CVUT FEL SWA semestral project
 |-|-|
 | Repository | https://github.com/strazovan/swa-rengars-notificator |
 | Swagger UI | http://localhost:8084/swagger-ui.html |
-| Actuators | http://localhost:8084/actuator/health, http://localhost:8084/| actuator/info |
+| Actuators | http://localhost:8084/actuator/health, http://localhost:8084/actuator/info |
