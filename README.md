@@ -20,18 +20,20 @@ CVUT FEL SWA semestral project
 |Password | root |
 
 ## Postgres
------------- | -------------
-Host | postgres
-Port | 5432
-Database | swa_statistics
-Username | swa_user
-Password | swa_password
+| | |
+|-|-|
+| Host | postgres |
+| Port | 5432 |
+| Database | swa_statistics |
+| Username | swa_user |
+| Password | swa_password |
 
 ## pgAdmin
------------- | -------------
-URL | http://localhost:8081
-Email | user@swa.com
-Password | swa_password
+| | |
+|-|-|
+| URL | http://localhost:8081 |
+| Email | user@swa.com |
+| Password | swa_password |
 
 ## MongoDB CLI
 > mongo -u swa_root -p swa_password
@@ -41,36 +43,42 @@ Password | swa_password
 > use swa_notification
 
 ## RabbitMQ
------------- | -------------
-URL | http://localhost:15672
-User | guest 
-Password | guest
+| | |
+|-|-|
+| URL | http://localhost:15672 |
+| User | guest |
+| Password | guest |
 
 ## Eureka
------------- | -------------
-URL | http://localhost:8761
-Repository | https://github.com/agilehorse/rengars_eureka
+| | |
+|-|-|
+| URL | http://localhost:8761 |
+| Repository | https://github.com/agilehorse/rengars_eureka |
 
 ## Users service
------------- | -------------
-Repository | https://github.com/uhel97/swa-rengars-user-service
-Swagger UI | http://localhost:8090/swagger-ui.html
-Actuators |
+| | |
+|-|-|
+| Repository | https://github.com/uhel97/swa-rengars-user-service |
+| Swagger UI | http://localhost:8090/swagger-ui.html |
+| Actuators | |
 
 ## Markerplace service
------------- | -------------
-Repository | https://github.com/agilehorse/rengars_marketplace
-Swagger UI | http://localhost:8085/ui
-Actuators |  http://localhost:8085/actuator/health, http://localhost:8085/actuator/info
+| | |
+|-|-|
+| Repository | https://github.com/agilehorse/rengars_marketplace |
+| Swagger UI | http://localhost:8085/ui |
+| Actuators |  http://localhost:8085/actuator/health, http://localhost:8085/actuator/info |
 
 ## Statistics service
------------- | -------------
-Repository | https://github.com/VaSmitka/Marketplace-Statistics
-Swagger UI | http://localhost:8083/docs
-Actuators | http://localhost:8083/health, http://localhost:8083/info, http://localhost:8083/metrics
+| | |
+|-|-|
+| Repository | https://github.com/VaSmitka/Marketplace-Statistics |
+| Swagger UI | http://localhost:8083/docs |
+| Actuators | http://localhost:8083/health, http://localhost:8083/info, http://localhost:8083/metrics |
 
 ## Notification service
------------- | -------------
-Repository | https://github.com/strazovan/swa-rengars-notificator
-Swagger UI | http://localhost:8084/swagger-ui.html
-Actuators | http://localhost:8084/actuator/health, http://localhost:8084/actuator/info
+| | |
+|-|-|
+| Repository | https://github.com/strazovan/swa-rengars-notificator |
+| Swagger UI | http://localhost:8084/swagger-ui.html |
+| Actuators | http://localhost:8084/actuator/health, http://localhost:8084/| actuator/info |
