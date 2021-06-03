@@ -74,9 +74,11 @@ services:
     build:
       context: ./rengars_eureka
       dockerfile: Dockerfile
-    container_name: eureka    
+    container_name: swa_eureka    
     ports:
       - "${EUREKA_PORT}:${EUREKA_PORT}"
+    volumes:
+      - eurekadata:/var/lib/eureka
     networks:
       - rengars_eureka    
     restart: on-failure
@@ -298,6 +300,8 @@ volumes:
   mysqldata:
     driver: local
   mongodbdata:
+    driver: local
+  eurekadata:
     driver: local
   usersdata:
     driver: local
