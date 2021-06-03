@@ -12,11 +12,12 @@ CVUT FEL SWA semestral project
 1. docker-compose up
 
 ## PHPAdmin
------------- | -------------
-URL | http://localhost:8087
-Server | mysql
-User | root
-Password | root
+| | |
+|-|-|
+|URL | http://localhost:8087 |
+|Server | mysql |
+|User | root |
+|Password | root |
 
 ## Postgres
 ------------ | -------------
@@ -34,9 +35,9 @@ Password | swa_password
 
 ## MongoDB CLI
 > mongo -u swa_root -p swa_password
-### Marketplace service
+*  Marketplace service
 > use swa_marketplace
-### Notification service
+* Notification service
 > use swa_notification
 
 ## RabbitMQ
