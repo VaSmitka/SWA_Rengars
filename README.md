@@ -60,7 +60,7 @@ CVUT FEL SWA semestral project
 |-|-|
 | Repository | https://github.com/uhel97/swa-rengars-user-service |
 | Swagger UI | http://localhost:8090/swagger-ui.html |
-| Actuators | |
+| Actuators | http://localhost:8090/actuator/health, http://localhost:8090/actuator/info |
 
 ## Markerplace service
 | | |

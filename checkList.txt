@@ -1,6 +1,6 @@
 Servise check:
   Users - OK
-  Marketplace - OK
+  Marketplace
   Statistics - OK
   Notification - OK
 
@@ -11,9 +11,8 @@ DB check:
   Notification + database - OK
 
 Servise comunication check:
-  Users event to Statistics
-  Users event to Notification
+  Users event to Statistics - OK
+  Users event to Notification - OK
   Marketplace event to Statistics
   Marketplace event to Notification
-  Users eureka to Marketplace
   Marketplace eureka to Users

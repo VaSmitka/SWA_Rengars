@@ -90,7 +90,9 @@ services:
     expose:
       - ${RABBIT_MQ_PORT}
     ports:
-      - ${RABBIT_MQ_UI_PORT}:15672    
+      - ${RABBIT_MQ_UI_PORT}:15672 
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq  
     networks:
     - rengars_rabbit_mq
     restart: on-failure
@@ -106,7 +108,7 @@ services:
     depends_on:
       - postgres
     volumes:
-      - /var/lib/pgadmin    
+      - pgadmindata:/var/lib/pgadmin    
     networks:
       - postgres_db_admin
     restart: on-failure
@@ -120,6 +122,8 @@ services:
       - ${PHPADMIN_PORT}:80
     depends_on:
       -  mysql
+    volumes:
+      - phpmyadmindata:/var/lib/phpmyadmin
     networks:
       - mysql_db_admin
     restart: on-failure
@@ -173,6 +177,7 @@ services:
       MONGODB_USERNAME: ${DB_MARKETPLACE_USERNAME}
       MONGODB_PASSWORD: ${DB_MARKETPLACE_PASSWORD}
       MONGODB_HOSTNAME: ${MONGO_HOST}
+      PYTHONUNBUFFERED: "TRUE"
     depends_on:
       - rabbitmq
       - mongodb
@@ -304,6 +309,12 @@ volumes:
     driver: local
   eurekadata:
     driver: local
+  rabbitmqdata:
+    driver: local
+  pgadmindata:
+    driver: local 
+  phpmyadmindata:
+    driver: local 
   usersdata:
     driver: local
   marketplacedata:

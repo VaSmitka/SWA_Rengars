@@ -27,6 +27,7 @@ db.configurations.insert({
   },
   'template':'Dear \${name}, hi. Thanks, bye :)'
 });
+
 db.configurations.insert({
   'type':'JOB_OFFER_CREATED',
   'notificatorName':'MailNotificator',
@@ -36,13 +37,32 @@ db.configurations.insert({
   },
   'template':'There is a new marketplace offer from company \${companyName}: \n\${description}.'
 });
+
 db.configurations.insert({
-  'type':'NEW_USER_ACCOUNT_REGISTERED',
+  'type':'NEW_USER_ACCOUNT_CREATED',
   'notificatorName':'MailNotificator',
   'notificatorParameters':{
     'from':'$FROM_MAIL_ADDRESS',
     'subject': 'Welcome'
   },
   'template':'Dear \${name}, thank you for your registration. Bye :)'
+});
+
+db.configurations.insert({
+  'type':'NEW_USER_ACCOUNT_CREATED',
+  'notificatorName':'ConsoleNotificator',
+  'notificatorParameters':{
+    'prefix':'users: '
+  },
+  'template':'Dear \${name}, thank you for your registration. Bye 🙂'
+});
+
+db.configurations.insert({
+  'type':'JOB_OFFER_CREATED',
+  'notificatorName':'ConsoleNotificator',
+  'notificatorParameters':{
+    'prefix':'marketplace: '
+  },
+  'template':'There is a new marketplace offer from company \${companyName}: \n\${description}.'
 });
 EOF
