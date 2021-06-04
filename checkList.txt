@@ -13,6 +13,6 @@ DB check:
 Servise comunication check:
   Users event to Statistics - OK
   Users event to Notification - OK
-  Marketplace event to Statistics
-  Marketplace event to Notification
-  Marketplace eureka to Users
+  Marketplace event to Statistics - OK
+  Marketplace event to Notification - OK
+  Marketplace eureka to Users - OK
